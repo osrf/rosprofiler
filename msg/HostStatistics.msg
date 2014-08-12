@@ -8,10 +8,9 @@ int16 cpus_available
 
 uint16 num_samples
 
-# Total CPU and Memory used on this machine
-float32 cpu_load_mean
-float32 cpu_load_std
-float32 cpu_load_max
+float32[] cpu_load_mean
+float32[] cpu_load_std
+float32[] cpu_load_max
 
 # mem_avialable
 float64 phymem_used_mean
