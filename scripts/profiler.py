@@ -53,10 +53,11 @@ class Profiler(object):
         self._graphupdate_timer = rospy.Timer(self.update_rate, self._update_node_list)
 
     def stop(self):
-        for timer in [self._monitor_timer, self._publisher_timer, self._graphupdate_timer]:
-            if timer.is_alive():
-                timer.cancel()
-                timer.join()
+        timers = [self._monitor_timer, self._publisher_timer, self._graphupdate_timer]
+        for timer in timers:
+            timer.shutdown()
+        for timer in timers:
+            timer.join()
 
     def _update_node_list(self, event=None):
         """ Contacts the master using xmlrpc to determine what processes to watch """
