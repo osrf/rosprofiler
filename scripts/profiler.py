@@ -35,6 +35,13 @@ class Profiler(object):
         self._nodes = dict()
 
     def start(self):
+
+        # Make sure that /enable_statistics is set
+        if not rospy.get_param('/enable_statistics', False):
+            rospy.signal_shutdown("Rosparam '/enable_statistics' has not been set to true. Aborting")
+            return
+
+
         if self._monitor_timer is not None:
             raise Exception("Monitor Timer already started!")
         if self._graphupdate_timer is not None:
@@ -67,12 +74,12 @@ class Profiler(object):
             # Remove Node monitors for processes that no longer exist
             for name in self._nodes.keys():
                 if not self._nodes[name].is_running():
-                    print "Removing Monitor for '%s'"%name
+                    rospy.loginfo("Removing Monitor for '%s'"%name)
                     self._nodes.pop(name)
             # Add node monitors for nodes on this machine we are not already monitoring
             for name in nodenames:
                 if not name in self._nodes:
-                    print "Adding Monitor for '%s'"%name
+                    rospy.loginfo("Adding Monitor for '%s'"%name)
                     try:
                         uri = self._master.lookupNode(name)
                         code, msg, pid = xmlrpclib.ServerProxy(uri).getPid('/NODEINFO')
@@ -99,6 +106,7 @@ class Profiler(object):
     def _publish_data(self, event=None):
         """ Publishes data about the host and processing running on it. """
         with self._lock:
+            rospy.logdebug("Publish data")
             # Publish the Hosts Statistics
             self._host_publisher.publish(self._host_monitor.get_statistics())
             self._host_monitor.reset()
