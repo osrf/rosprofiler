@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(rosprofiler)
 
 find_package(catkin REQUIRED COMPONENTS
+  message_generation
   rospy
   std_msgs
   ros_topology_msgs
