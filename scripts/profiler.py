@@ -15,7 +15,6 @@ from rosprofiler.msg import *
 class Profiler(object):
     """ """
     def __init__(self, sample_rate=None, update_rate=None):
-        self._host_monitor = HostMonitor()
         self.sample_rate = sample_rate or rospy.Duration(0.1)
         self.update_rate = update_rate or rospy.Duration(2)
         rospy.init_node('profiler_%s'%rosgraph.network.get_host_name())
@@ -109,7 +108,7 @@ class Profiler(object):
                 node.reset()
          
 class HostMonitor(object):
-    """ Tracks cpu and memory information of the host using an internal timing mechanism """
+    """ Tracks cpu and memory information of the host. """
     def __init__(self):
         self._hostname = rosgraph.network.get_host_name()
         self._ipaddress = rosgraph.network.get_local_address()
@@ -118,44 +117,52 @@ class HostMonitor(object):
         self.cpu_load_log = list()
         self.phymem_used_log = list()
         self.phymem_avail_log = list()
+        self.start_time = rospy.get_rostime()
 
     def update(self):
-        self.cpu_load_log.append(psutil.cpu_percent(interval=0))
+        """ Record information about the cpu and memory usage for this host into a buffer """
+        self.cpu_load_log.append(psutil.cpu_percent(interval=0,percpu=True))
         self.phymem_used_log.append(psutil.used_phymem())
         self.phymem_avail_log.append(psutil.avail_phymem())
 
     def get_statistics(self):
-        """ Returns a HostStatistics() with NO NODE INFORMATION """
-        host = HostStatistics()
-        host.hostname = self._hostname
-        host.ipaddress = self._ipaddress
-        host.cpus_available = self._cpus_available
+        """ Returns HostStatistics() using buffered information. """
+        statistics = HostStatistics()
+        statistics.hostname = self._hostname
+        statistics.ipaddress = self._ipaddress
+        statistics.window_start = self.start_time
+        statistics.window_stop = rospy.get_rostime()
+        statistics.samples = len(self.cpu_load_log)
 
         if len(self.cpu_load_log) > 0:
             cpu_load_log = np.array(self.cpu_load_log)
-            host.cpu_load_mean = np.mean(cpu_load_log)
-            host.cpu_load_std = np.std(cpu_load_log)
-            host.cpu_load_max = np.max(cpu_load_log)
+            cpu_load_log = cpu_load_log.transpose()
+            for cpu in range(self._cpus_available):
+                statistics.cpu_load_mean.append(np.mean(cpu_load_log[cpu]))
+                statistics.cpu_load_std.append(np.std(cpu_load_log[cpu]))
+                statistics.cpu_load_max.append(np.max(cpu_load_log[cpu]))
         if len(self.phymem_used_log) > 0:
             phymem_used_log = np.array(self.phymem_used_log)
-            host.phymem_used_mean = np.mean(phymem_used_log)
-            host.phymem_used_std = np.std(phymem_used_log)
-            host.phymem_used_max = np.max(phymem_used_log)
+            statistics.phymem_used_mean = np.mean(phymem_used_log)
+            statistics.phymem_used_std = np.std(phymem_used_log)
+            statistics.phymem_used_max = np.max(phymem_used_log)
         if len(self.phymem_avail_log) > 0:
             phymem_avail_log = np.array(self.phymem_avail_log)
-            host.phymem_avail_mean = np.mean(phymem_avail_log)
-            host.phymem_avail_std = np.std(phymem_avail_log)
-            host.phymem_avail_max = np.max(phymem_avail_log)
-        return host
+            statistics.phymem_avail_mean = np.mean(phymem_avail_log)
+            statistics.phymem_avail_std = np.std(phymem_avail_log)
+            statistics.phymem_avail_max = np.max(phymem_avail_log)
+        return statistics
 
     def reset(self):
+        """ Clears the information buffer. """
         self.cpu_load_log = list()
         self.phymem_used_log = list()
         self.phymem_avail_log = list()
+        self.start_time = rospy.get_rostime()
 
 
 class NodeMonitor(object):
-    """ Tracks process statistics of a PID using an internal timing mechanism"""
+    """ Tracks process statistics of a PID. """
     def __init__(self,name, uri, pid):
         self.node = name
         self.hostname = rosgraph.network.get_host_name()
@@ -167,7 +174,6 @@ class NodeMonitor(object):
         self.cpu_log = list()
         self.virt_log = list()
         self.res_log = list()
-        self.samples = 0
         self.num_threads = 0
         self.start_time = rospy.get_rostime()
 
@@ -177,21 +183,20 @@ class NodeMonitor(object):
         return self._process.is_running()
 
     def update(self):
+        """ Record cpu and memory information about this procress into a buffer """
         try:
             self.cpu_log.append(self._process.get_cpu_percent(interval=0))
             virt, real = self._process.get_memory_info()
             self.virt_log.append(virt)
             self.res_log.append(real)
             self.num_threads = max(self.num_threads, self._process.get_num_threads())
-            self.samples += 1
         except psutil.NoSuchProcess:
             rospy.logwarn("Lost Node Monitor for '%s'"%self.node)
             self._process = None
             self._process_ok = False
 
     def get_statistics(self):
-        """ Returns NodeStatistics() """
-        assert(self.samples == len(self.cpu_log))
+        """ Returns NodeStatistics() using information stored in the buffer.  """
         statistics = NodeStatistics()
         statistics.node = self.node
         statistics.host = self.hostname
@@ -220,11 +225,11 @@ class NodeMonitor(object):
         return statistics
 
     def reset(self):
+        """ Clears the statistics information stored in the buffer """
         self.cpu_log = list()
         self.virt_log = list()
         self.res_log = list()
         self.num_threads = 0
-        self.samples = 0
         self.start_time = rospy.get_rostime()
 
 
