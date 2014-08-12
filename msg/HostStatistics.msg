@@ -4,10 +4,9 @@ string ipaddress
 time window_start
 time window_stop
 
-int16 cpus_available
+uint16 samples
 
-uint16 num_samples
-
+# Load per CPU
 float32[] cpu_load_mean
 float32[] cpu_load_std
 float32[] cpu_load_max
