@@ -45,6 +45,12 @@ class Grapher(object):
         nodes = dict() # name: Node()
         topics = dict() # name: Topic()
 
+        # This is an extra lookup table. The API at http://wiki.ros.org/ROS/Slave_API is 
+        # lying to us and the protocol is inconsistent! Sometimes the destination in
+        # getBusInfo() returns a URI, sometimes it is a node name :( So we keep
+        # a list of URIs that we can translate back into node names using this.
+        node_uris = dict()
+
         # Query master and compile a list of all published topics and their types
         allCurrentTopics = self._master.getTopicTypes()
         for topic,type_ in allCurrentTopics:
@@ -56,6 +62,7 @@ class Grapher(object):
             node = Node(name=name)
             try:
                 node.uri = self._master.lookupNode(name)
+                node_uris[node.uri] = name
             except rosgraph.masterapi.MasterError:
                 rospy.logerr("WARNING: MasterAPI Error trying to contact '%s', skipping"%name)
                 continue
@@ -92,7 +99,14 @@ class Grapher(object):
                 bus_info = node_proxy.getBusInfo(self._NAME)[2]
                 for bus in bus_info:
                     c = Connection()
-                    c.destination = bus[1]
+                    dest_id = bus[1]
+                    if len(dest_id) > 7 and dest_id[:7] == "http://":
+                        if dest_id in node_uris:
+                            c.destination = node_uris[dest_id]
+                        else:
+                            c.destination = "unknown (%s)"%dest_id
+                    else:
+                        c.destination = dest_id
                     c.direction = {'o': Connection.OUT, 'i': Connection.IN, 'b': Connection.BOTH}[bus[2]]
                     c.transport = bus[3]
                     c.topic = bus[4]
