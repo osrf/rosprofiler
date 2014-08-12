@@ -1,0 +1,7 @@
+<launch>
+  <param name="/enable_statistics" value="true" />
+  <node pkg="rospy_tutorials" type="talker.py" name="talker" />
+  <node pkg="rospy_tutorials" type="listener.py" name="listener" />
+  <node pkg="rosprofiler" type="profiler.py" name="profiler" output="screen" />
+  <test pkg="rosprofiler" type="test_profiler.py" test-name="test_profiler" />
+</launch>
