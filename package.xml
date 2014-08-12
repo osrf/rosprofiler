@@ -19,4 +19,5 @@
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>ros_topology_msgs</run_depend>
+  <test_depend>unittest</test_depend>
 </package>
