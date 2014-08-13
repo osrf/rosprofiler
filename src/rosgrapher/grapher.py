@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright 2014 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +18,6 @@ import xmlrpclib
 from ros_topology_msgs.msg import *
 import re
 
-
-
 class Grapher(object):
     """ Publishes a latched ros_topology_msgs/Graph message describing the system state.
     Grapher uses the xmlrpc api to query information from the master and from individual nodes. 
@@ -29,7 +26,6 @@ class Grapher(object):
     """
     def __init__(self, name=None):
         self._NAME = name or "Grapher"
-        rospy.init_node(self._NAME)
 
         # Force singleton by not allowing name to be remapped
         if not re.findall("^/*(.+)$",rospy.get_name())[0] == self._NAME:
@@ -153,10 +149,4 @@ class Grapher(object):
         graph.nodes.extend(nodes.values())
         graph.topics.extend(topics.values())
         self._publisher.publish(graph)
-
-if __name__ == '__main__':
-    grapher = Grapher()
-    grapher.start()
-    rospy.spin()
-
 

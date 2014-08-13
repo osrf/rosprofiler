@@ -49,6 +49,7 @@ CATKIN_DEPENDS rospy std_msgs ros_topology_msgs ros_statistics_msgs
 
 install(PROGRAMS
   scripts/rosprofiler
+  scripts/rosgrapher
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
