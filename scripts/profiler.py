@@ -38,9 +38,7 @@ class Profiler(object):
 
         # Make sure that /enable_statistics is set
         if not rospy.get_param('/enable_statistics', False):
-            rospy.signal_shutdown("Rosparam '/enable_statistics' has not been set to true. Aborting")
-            return
-
+            raise rospy.ROSInitException("Rosparam '/enable_statistics' has not been set to true. Aborting")
 
         if self._monitor_timer is not None:
             raise Exception("Monitor Timer already started!")
@@ -247,5 +245,8 @@ if __name__ == '__main__':
     try:
         profiler.start()
         rospy.spin()
+    except rospy.ROSInitException as e:
+        rospy.logerr(str(e))
+        rospy.signal_shutdown(str(e))
     except rospy.ROSInterruptException:
         profiler.stop()
