@@ -12,6 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+This module implements a ROS node which profiles the resource usage of each node
+process being run on the machine, as well as the resources of the host itself.
+This information is published on the topics /node_statistics and /host_statistics.
+
+"""
 import psutil
 import numpy as np
 from threading import *
@@ -48,7 +54,9 @@ class Profiler(object):
         self._nodes = dict()
 
     def start(self):
-
+        """ Starts the Profiler
+        :raises: ROSInitException when /enable_statistics has not been set to True
+        """
         # Make sure that /enable_statistics is set
         if not rospy.get_param('/enable_statistics', False):
             raise rospy.ROSInitException("Rosparam '/enable_statistics' has not been set to true. Aborting")
@@ -147,7 +155,11 @@ class HostMonitor(object):
         self.phymem_avail_log.append(psutil.avail_phymem())
 
     def get_statistics(self):
-        """ Returns HostStatistics() using buffered information. """
+        """ Returns HostStatistics() using buffered information. 
+        :returns: statistics information collected about the host
+        :rtype: HostStatistics
+        """
+
         statistics = HostStatistics()
         statistics.hostname = self._hostname
         statistics.ipaddress = self._ipaddress
@@ -184,7 +196,12 @@ class HostMonitor(object):
 
 class NodeMonitor(object):
     """ Tracks process statistics of a PID. """
-    def __init__(self,name, uri, pid):
+    def __init__(self, name, uri, pid):
+        """
+        :param str name: the registered node name
+        :param str uri: the xmlrpc uri of the node
+        :param int pid: the process PID of this node
+        """
         self.node = name
         self.hostname = rosgraph.network.get_host_name()
         self.uri = uri
@@ -199,6 +216,9 @@ class NodeMonitor(object):
         self.start_time = rospy.get_rostime()
 
     def is_running(self):
+        """ Returns if we are still monitoring the process of the PID.
+        :rtype: bool
+        """
         if self._process is None:
             return False
         return self._process.is_running()
@@ -217,7 +237,10 @@ class NodeMonitor(object):
             self._process_ok = False
 
     def get_statistics(self):
-        """ Returns NodeStatistics() using information stored in the buffer.  """
+        """ Returns NodeStatistics() using information stored in the buffer. 
+        :returns: statistics information collected about the process
+        :rtype: NodeStatistics
+        """
         statistics = NodeStatistics()
         statistics.node = self.node
         statistics.host = self.hostname
