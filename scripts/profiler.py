@@ -59,6 +59,7 @@ class Profiler(object):
 
     def stop(self):
         timers = [self._monitor_timer, self._publisher_timer, self._graphupdate_timer]
+        timers = [timer for timer in timers if timer is not None] 
         for timer in timers:
             timer.shutdown()
         for timer in timers:
