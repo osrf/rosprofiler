@@ -240,8 +240,18 @@ class NodeMonitor(object):
         self.num_threads = 0
         self.start_time = rospy.get_rostime()
 
+def custom_exception_handler(type, value, tb):
+    """ Gracefully handles ROSInterruptExceptions in rospy.Timer """
+    # NOTE: I was having trouble with Timer exiting with an exception, but
+    # that problem doesn't seem to be happening anymore. I am leaving this
+    # code here in case it is needed in the future.
+    if type is rospy.ROSInterruptException:
+        return 
+    else:
+        sys.__excepthook__(type, value, tb)
 
 if __name__ == '__main__':
+#     sys.excepthook = custom_exception_handler
     profiler = Profiler()
     try:
         profiler.start()
@@ -250,4 +260,6 @@ if __name__ == '__main__':
         rospy.logerr(str(e))
         rospy.signal_shutdown(str(e))
     except rospy.ROSInterruptException:
+        pass
+    finally:
         profiler.stop()
