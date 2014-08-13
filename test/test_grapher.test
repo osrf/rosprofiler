@@ -1,0 +1,9 @@
+<launch>
+  <node pkg="rospy_tutorials" type="talker.py" name="talker1" />
+  <node pkg="rospy_tutorials" type="talker.py" name="talker2" />
+  <node pkg="rospy_tutorials" type="listener.py" name="listener1" />
+  <node pkg="rospy_tutorials" type="listener.py" name="listener2" />
+  <node pkg="rosprofiler" type="grapher.py" name="Grapher" output="screen"/>
+  <test pkg="rosprofiler" type="test_grapher.py" test-name="test_grapher" />
+
+</launch>
