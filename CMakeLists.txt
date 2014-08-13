@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(rosprofiler)
 
 find_package(catkin REQUIRED COMPONENTS
-  message_generation
   rospy
   std_msgs
   ros_topology_msgs
+  ros_statistics_msgs
   rostest
 )
 
@@ -38,19 +38,8 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-add_message_files(DIRECTORY msg
-  FILES
-  NodeStatistics.msg
-  HostStatistics.msg
-)
-
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-)
-
 catkin_package(
-CATKIN_DEPENDS rospy std_msgs ros_topology_msgs
+CATKIN_DEPENDS rospy std_msgs ros_topology_msgs ros_statistics_msgs
 )
 
 #############

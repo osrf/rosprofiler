@@ -5,7 +5,7 @@ import time
 import rospy
 import rostest
 
-from rosprofiler.msg import NodeStatistics
+from ros_statistics_msgs.msg import NodeStatistics
 from std_msgs.msg import String
 
 # TODO:

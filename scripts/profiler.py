@@ -10,7 +10,7 @@ import rospy
 import rosgraph
 import rosnode
 import xmlrpclib
-from rosprofiler.msg import *
+from ros_statistics_msgs.msg import *
 
 class Profiler(object):
     """ """
