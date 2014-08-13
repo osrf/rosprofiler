@@ -90,4 +90,5 @@ CATKIN_DEPENDS rospy std_msgs ros_topology_msgs
 
 if(CATKIN_ENABLE_TESTING)
     add_rostest(test/test_profiler.test)
+    add_rostest(test/test_grapher.test)
 endif()
