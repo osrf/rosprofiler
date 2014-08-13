@@ -7,6 +7,8 @@
   <maintainer email="dan@osrfoundation.org">Dan Brooks</maintainer>
   <license>Apache 2.0</license>
   <!-- <url type="website">http://wiki.ros.org/rosprofiler</url> -->
+  <url type="repository">http://github.com/mrdanbrooks/rosprofiler</url>
+  <url type="bugtracker">http://github.com/mrdanbrooks/rosprofiler/issues</url>
   <author>Dan Brooks</author>
 
   <buildtool_depend>catkin</buildtool_depend>
