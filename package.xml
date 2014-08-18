@@ -3,26 +3,22 @@
   <name>rosprofiler</name>
   <version>0.0.2</version>
   <description>The rosprofiler package</description>
-
   <maintainer email="dan@osrfoundation.org">Dan Brooks</maintainer>
   <license>Apache 2.0</license>
-  <!-- <url type="website">http://wiki.ros.org/rosprofiler</url> -->
+
+  <url type="website">http://wiki.ros.org/rosprofiler</url>
   <url type="repository">http://github.com/mrdanbrooks/rosprofiler</url>
+
   <url type="bugtracker">http://github.com/mrdanbrooks/rosprofiler/issues</url>
-  <author>Dan Brooks</author>
+  <author email="dan@osrfoundation.org">Dan Brooks</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>message_generation</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>ros_topology_msgs</build_depend>
-  <build_depend>ros_statistics_msgs</build_depend>
 
-  <run_depend>message_runtime</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>ros_topology_msgs</run_depend>
   <run_depend>ros_statistics_msgs</run_depend>
-  <test_depend>rostest</test_depend>
+  <run_depend>ros_topology_msgs</run_depend>
+  <run_depend>rospy</run_depend>
+
   <test_depend>rospy_tutorials</test_depend>
+  <test_depend>rostest</test_depend>
+
 </package>

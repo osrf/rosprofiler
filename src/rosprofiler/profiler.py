@@ -11,34 +11,37 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """
 This module implements a ROS node which profiles the resource usage of each node
 process being run on the machine, as well as the resources of the host itself.
 This information is published on the topics /node_statistics and /host_statistics.
 
 """
-import psutil
-import numpy as np
-from threading import *
-# import multiprocessing # for multiprocessing.cpu_count()
+
+import threading
+import xmlrpclib
 
 import rospy
 import rosgraph
 import rosnode
-import xmlrpclib
-from ros_statistics_msgs.msg import *
+
+from ros_statistics_msgs.msg import NodeStatistics
+from ros_statistics_msgs.msg import HostStatistics
+
 from host_monitor import HostMonitor
 from node_monitor import NodeMonitor
+
 
 class Profiler(object):
     """ """
     def __init__(self, sample_rate=None, update_rate=None):
         self.sample_rate = sample_rate or rospy.Duration(0.1)
         self.update_rate = update_rate or rospy.Duration(2)
-        rospy.init_node('profiler_%s'%rosgraph.network.get_host_name())
-        self._master = rosgraph.Master('profiler_%s'%rosgraph.network.get_host_name())
+        rospy.init_node('profiler_%s' % rosgraph.network.get_host_name())
+        self._master = rosgraph.Master('profiler_%s' % rosgraph.network.get_host_name())
 
-        self._lock = Lock()
+        self._lock = threading.Lock()
         self._monitor_timer = None
         self._publisher_timer = None
         self._graphupdate_timer = None
@@ -46,8 +49,8 @@ class Profiler(object):
         # Data Structure for collecting information about the host
         self._host_monitor = HostMonitor()
 
-        self._node_publisher = rospy.Publisher('node_statistics', NodeStatistics, queue_size = 10)
-        self._host_publisher = rospy.Publisher('host_statistics', HostStatistics, queue_size = 10)
+        self._node_publisher = rospy.Publisher('node_statistics', NodeStatistics, queue_size=10)
+        self._host_publisher = rospy.Publisher('host_statistics', HostStatistics, queue_size=10)
 
         # Processes we are watching
         self._nodes = dict()
@@ -79,7 +82,7 @@ class Profiler(object):
 
     def stop(self):
         timers = [self._monitor_timer, self._publisher_timer, self._graphupdate_timer]
-        timers = [timer for timer in timers if timer is not None] 
+        timers = [timer for timer in timers if timer is not None]
         for timer in timers:
             timer.shutdown()
         for timer in timers:
@@ -93,21 +96,21 @@ class Profiler(object):
             # Remove Node monitors for processes that no longer exist
             for name in self._nodes.keys():
                 if not self._nodes[name].is_running():
-                    rospy.loginfo("Removing Monitor for '%s'"%name)
+                    rospy.loginfo("Removing Monitor for '%s'" % name)
                     self._nodes.pop(name)
             # Add node monitors for nodes on this machine we are not already monitoring
             for name in nodenames:
-                if not name in self._nodes:
-                    rospy.loginfo("Adding Monitor for '%s'"%name)
+                if name not in self._nodes:
+                    rospy.loginfo("Adding Monitor for '%s'" % name)
                     try:
                         uri = self._master.lookupNode(name)
                         code, msg, pid = xmlrpclib.ServerProxy(uri).getPid('/NODEINFO')
                         node = NodeMonitor(name, uri, pid)
                     except rosgraph.masterapi.MasterError:
-                        rospy.logerr("WARNING: MasterAPI Error trying to contact '%s', skipping"%name)
+                        rospy.logerr("WARNING: MasterAPI Error trying to contact '%s', skipping" % name)
                         continue
                     except xmlrpclib.socket.error:
-                        rospy.logerr("WANRING: XML RPC ERROR contacting '%s', skipping"%name)
+                        rospy.logerr("WANRING: XML RPC ERROR contacting '%s', skipping" % name)
                         continue
                     self._nodes[name] = node
 
@@ -133,4 +136,3 @@ class Profiler(object):
             for node in self._nodes.values():
                 self._node_publisher.publish(node.get_statistics())
                 node.reset()
-
