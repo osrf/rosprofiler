@@ -11,28 +11,37 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import rospy
-import rosgraph
-import rosnode
-import xmlrpclib
-from ros_topology_msgs.msg import *
+
 import re
+import xmlrpclib
+
+import rosgraph
+import rospy
+import rosnode
+
+from ros_topology_msgs.msg import Connection
+from ros_topology_msgs.msg import Graph
+from ros_topology_msgs.msg import Node
+from ros_topology_msgs.msg import Service
+from ros_topology_msgs.msg import Topic
+
 
 class Grapher(object):
     """ Publishes a latched ros_topology_msgs/Graph message describing the system state.
-    Grapher uses the xmlrpc api to query information from the master and from individual nodes. 
+    Grapher uses the xmlrpc api to query information from the master and from individual nodes.
     Only one instance of this node should be run at a time.
-    Information is only published when a change is detected. 
+    Information is only published when a change is detected.
     """
     def __init__(self, name=None):
         self._NAME = name or "Grapher"
 
         # Force singleton by not allowing name to be remapped
-        if not re.findall("^/*(.+)$",rospy.get_name())[0] == self._NAME:
-            raise rospy.ROSInitException("Node '%s' of type rosprofiler/grapher.py should only use the name '%s' to avoid being run multiple times."%(rospy.get_name(), self._NAME))
+        if not re.findall("^/*(.+)$", rospy.get_name())[0] == self._NAME:
+            raise rospy.ROSInitException(
+                "Node '%s' of type rosprofiler/grapher.py should only use the name '%s' to avoid being run multiple times." % (rospy.get_name(), self._NAME))
 
         self._master = rosgraph.Master(self._NAME)
-        self._publisher = rospy.Publisher('/topology',Graph, queue_size = 10, latch = True)
+        self._publisher = rospy.Publisher('/topology', Graph, queue_size=10, latch=True)
         self._poller_timer = None
 
         # Message Sequence Number
@@ -51,19 +60,19 @@ class Grapher(object):
 
     def _poller_callback(self, event):
         """ Queries the state of the system using xmlrpc calls, and checks for changes """
-        nodes = dict() # name: Node()
-        topics = dict() # name: Topic()
+        nodes = {}  # name: Node()
+        topics = {}  # name: Topic()
 
-        # This is an extra lookup table. The API at http://wiki.ros.org/ROS/Slave_API is 
+        # This is an extra lookup table. The API at http://wiki.ros.org/ROS/Slave_API is
         # lying to us and the protocol is inconsistent! Sometimes the destination in
         # getBusInfo() returns a URI, sometimes it is a node name :( So we keep
         # a list of URIs that we can translate back into node names using this.
-        node_uris = dict()
+        node_uris = {}
 
         # Query master and compile a list of all published topics and their types
         allCurrentTopics = self._master.getTopicTypes()
-        for topic,type_ in allCurrentTopics:
-            topics[topic] = Topic(name=topic,type=type_)
+        for topic, type_ in allCurrentTopics:
+            topics[topic] = Topic(name=topic, type=type_)
 
         # Compile a list of nodes names and uris
         allCurrentNodes = rosnode.get_node_names()
@@ -73,7 +82,7 @@ class Grapher(object):
                 node.uri = self._master.lookupNode(name)
                 node_uris[node.uri] = name
             except rosgraph.masterapi.MasterError:
-                rospy.logerr("WARNING: MasterAPI Error trying to contact '%s', skipping"%name)
+                rospy.logerr("WARNING: MasterAPI Error trying to contact '%s', skipping" % name)
                 continue
             else:
                 nodes[name] = node
@@ -81,13 +90,13 @@ class Grapher(object):
         # Add lists of subscribers, publishers, and services for each topic
         systemstate = self._master.getSystemState()
         for topic_name, publisher_list in systemstate[0]:
-            if not topic_name in topics.keys():
-                rospy.logerr("Topic %s not found, skipping"%topic_name) 
+            if topic_name not in topics.keys():
+                rospy.logerr("Topic %s not found, skipping" % topic_name)
             for publishername in publisher_list:
                 nodes[publishername].publishes.append(topic_name)
         for topic_name, subscriber_list in systemstate[1]:
-            if not topic_name in topics.keys():
-                rospy.logerr("Topic %s not found, skipping"%topic_name) 
+            if topic_name not in topics.keys():
+                rospy.logerr("Topic %s not found, skipping" % topic_name)
             for subscribername in subscriber_list:
                 nodes[subscribername].subscribes.append(topic_name)
         for service_name, provider_list in systemstate[2]:
@@ -96,7 +105,7 @@ class Grapher(object):
                 try:
                     service.uri = self._master.lookupService(service_name)
                 except rosgraph.masterapi.MasterError:
-                    rospy.logerr("WARNING: MasterAPI Error trying to lookup service '%s', skipping"%service_name)
+                    rospy.logerr("WARNING: MasterAPI Error trying to lookup service '%s', skipping" % service_name)
                     continue
                 else:
                     nodes[providername].provides.append(service)
@@ -113,7 +122,7 @@ class Grapher(object):
                         if dest_id in node_uris:
                             c.destination = node_uris[dest_id]
                         else:
-                            c.destination = "unknown (%s)"%dest_id
+                            c.destination = "unknown (%s)" % dest_id
                     else:
                         c.destination = dest_id
                     c.direction = {'o': Connection.OUT, 'i': Connection.IN, 'b': Connection.BOTH}[bus[2]]
@@ -121,7 +130,7 @@ class Grapher(object):
                     c.topic = bus[4]
                     node.connections.append(c)
             except xmlrpclib.socket.error:
-                rospy.logerr("WANRING: XML RPC ERROR contacting '%s', skipping"%node.name)
+                rospy.logerr("WANRING: XML RPC ERROR contacting '%s', skipping" % node.name)
                 continue
 
         # If any nodes or topics are added removed or changed, publish update
@@ -149,4 +158,3 @@ class Grapher(object):
         graph.nodes.extend(nodes.values())
         graph.topics.extend(topics.values())
         self._publisher.publish(graph)
-

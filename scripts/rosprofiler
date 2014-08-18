@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 # Copyright 2014 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,28 +13,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from __future__ import unicode_literals
+
+import sys
+
 import rospy
+
 from rosprofiler import Profiler
 
+
 def custom_exception_handler(type, value, tb):
-    """ Gracefully handles ROSInterruptExceptions in rospy.Timer """
+    """Gracefully handles ROSInterruptExceptions in rospy.Timer.
+    """
     # NOTE: I was having trouble with Timer exiting with an exception, but
     # that problem doesn't seem to be happening anymore. I am leaving this
     # code here in case it is needed in the future.
     if type is rospy.ROSInterruptException:
-        return 
+        return
     else:
         sys.__excepthook__(type, value, tb)
 
 if __name__ == '__main__':
-#     sys.excepthook = custom_exception_handler
+    # sys.excepthook = custom_exception_handler
     profiler = Profiler()
     try:
         profiler.start()
         rospy.spin()
     except rospy.ROSInitException as e:
-        rospy.logerr(str(e))
-        rospy.signal_shutdown(str(e))
+        rospy.logerr("{0}".format(e))
+        rospy.signal_shutdown("{0}".format(e))
     except rospy.ROSInterruptException:
         pass
     finally:

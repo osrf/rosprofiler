@@ -11,15 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import psutil
-import numpy as np
-import multiprocessing # for multiprocessing.cpu_count()
 
-import rospy
+import multiprocessing  # for multiprocessing.cpu_count()
+import numpy as np
+import psutil
+
 import rosgraph
+import rospy
 
 from ros_statistics_msgs.msg import HostStatistics
-    
+
+
 class HostMonitor(object):
     """ Tracks cpu and memory information of the host. """
     def __init__(self):
@@ -34,12 +36,12 @@ class HostMonitor(object):
 
     def update(self):
         """ Record information about the cpu and memory usage for this host into a buffer """
-        self.cpu_load_log.append(psutil.cpu_percent(interval=0,percpu=True))
+        self.cpu_load_log.append(psutil.cpu_percent(interval=0, percpu=True))
         self.phymem_used_log.append(psutil.used_phymem())
         self.phymem_avail_log.append(psutil.avail_phymem())
 
     def get_statistics(self):
-        """ Returns HostStatistics() using buffered information. 
+        """ Returns HostStatistics() using buffered information.
         :returns: statistics information collected about the host
         :rtype: HostStatistics
         """

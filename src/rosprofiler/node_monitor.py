@@ -11,13 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import psutil
-import numpy as np
 
-import rospy
+import numpy as np
+import psutil
+
 import rosgraph
+import rospy
 
 from ros_statistics_msgs.msg import NodeStatistics
+
 
 class NodeMonitor(object):
     """ Tracks process statistics of a PID. """
@@ -32,7 +34,7 @@ class NodeMonitor(object):
         self.uri = uri
         self.pid = pid
         self._process = psutil.Process(int(self.pid))
-        self._process_ok = True # This gets set to false if the process dies
+        self._process_ok = True  # This gets set to false if the process dies
 
         self.cpu_log = list()
         self.virt_log = list()
@@ -57,12 +59,12 @@ class NodeMonitor(object):
             self.res_log.append(real)
             self.num_threads = max(self.num_threads, self._process.get_num_threads())
         except psutil.NoSuchProcess:
-            rospy.logwarn("Lost Node Monitor for '%s'"%self.node)
+            rospy.logwarn("Lost Node Monitor for '%s'" % self.node)
             self._process = None
             self._process_ok = False
 
     def get_statistics(self):
-        """ Returns NodeStatistics() using information stored in the buffer. 
+        """ Returns NodeStatistics() using information stored in the buffer.
         :returns: statistics information collected about the process
         :rtype: NodeStatistics
         """
