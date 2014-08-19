@@ -1,23 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rosprofiler)
 
-find_package(catkin REQUIRED
-  COMPONENTS
-    ros_statistics_msgs
-    ros_topology_msgs
-    rospy
-    std_msgs
-)
+find_package(catkin REQUIRED)
 
 catkin_python_setup()
 
-catkin_package(
-  CATKIN_DEPENDS
-    ros_statistics_msgs
-    ros_topology_msgs
-    rospy
-    std_msgs
-)
+catkin_package()
 
 install(PROGRAMS scripts/rosprofiler scripts/rosgrapher
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
