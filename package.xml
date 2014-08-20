@@ -16,12 +16,11 @@
 
   <run_depend>ros_statistics_msgs</run_depend>
   <run_depend>ros_topology_msgs</run_depend>
+  <run_depend>rosgraph</run_depend>
+  <run_depend>rosnode</run_depend>
   <run_depend>rospy</run_depend>
 
   <test_depend>rospy_tutorials</test_depend>
   <test_depend>rostest</test_depend>
-  <test_depend>rosnode</test_depend>
-  <test_depend>rosgraph</test_depend>
-  <test_depend>xmlrpclib</test_depend>
 
 </package>
