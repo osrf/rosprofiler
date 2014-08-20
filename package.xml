@@ -19,6 +19,7 @@
   <run_depend>rosgraph</run_depend>
   <run_depend>rosnode</run_depend>
   <run_depend>rospy</run_depend>
+  <run_depend>python-psutil</run_depend>
 
   <test_depend>rospy_tutorials</test_depend>
   <test_depend>rostest</test_depend>
