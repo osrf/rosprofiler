@@ -23,19 +23,32 @@ import rospy
 from rosprofiler import Profiler
 
 
-def custom_exception_handler(type_, value, tb):
-    """Gracefully handles ROSInterruptExceptions in rospy.Timer """
-    if not isinstance(type_, rospy.ROSInterruptException):
-        sys.__excepthook__(type_, value, tb)
-    else:
-        import os
-        import traceback
-        rospy.logdebug(traceback.format_tb(tb))
-        if 'ROSPY_TIMER_DEBUG' in os.environ:
-            rospy.logwarn(traceback.format_tb(tb))
+def install_thread_excepthook():
+    """
+    Workaround for sys.excepthook thread bug
+    (https://sourceforge.net/tracker/?func=detail&atid=105470&aid=1230540&group_id=5470).
+    Call once from __main__ before creating any threads.
+    If using psyco, call psycho.cannotcompile(threading.Thread.run)
+    since this replaces a new-style class method.
+
+    Gracefully handles ROSInterruptExceptions in rospy.Timer 
+    """
+    run_old = rospy.Timer.run
+    def run(*args, **kwargs):
+        try:
+            sys.stdout.flush()
+            run_old(*args, **kwargs)
+        except rospy.ROSInterruptException:
+            import os
+            import traceback
+            rospy.logdebug(traceback.format_exc())
+            if 'ROSPY_TIMER_DEBUG' in os.environ:
+                rospy.logwarn(traceback.format_exc())
+    rospy.Timer.run = run
 
 if __name__ == '__main__':
-    sys.excepthook = custom_exception_handler
+    install_thread_excepthook()
+
     profiler = Profiler()
     try:
         profiler.start()
