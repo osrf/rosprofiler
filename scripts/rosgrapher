@@ -46,7 +46,7 @@ def install_thread_excepthook():
 
 if __name__ == '__main__':
     install_thread_excepthook()
-    rospy.init_node('Grapher')
+    rospy.init_node('rosgrapher')
     grapher = Grapher()
     grapher.start()
     rospy.spin()

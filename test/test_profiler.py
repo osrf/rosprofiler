@@ -29,7 +29,7 @@ PKG = 'rosprofiler'
 NAME = 'test_profiler'
 
 # These are the nodes we expect to receive information about
-EXPECTED_NODES = ['/talker', '/listener', '/profiler', '/rosout', '/test_profiler']
+EXPECTED_NODES = ['/talker', '/listener', '/rosprofiler_test', '/rosout', '/test_profiler']
 
 class TestProfiler(unittest.TestCase):
     def __init__(self, *args):

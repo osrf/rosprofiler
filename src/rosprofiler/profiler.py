@@ -38,8 +38,8 @@ class Profiler(object):
     def __init__(self, sample_rate=None, update_rate=None):
         self.sample_rate = sample_rate or rospy.Duration(0.1)
         self.update_rate = update_rate or rospy.Duration(2)
-        rospy.init_node('profiler_%s' % rosgraph.network.get_host_name())
-        self._master = rosgraph.Master('profiler_%s' % rosgraph.network.get_host_name())
+        rospy.init_node('rosprofiler_%s' % rosgraph.network.get_host_name())
+        self._master = rosgraph.Master('rosprofiler_%s' % rosgraph.network.get_host_name())
 
         self._lock = threading.Lock()
         self._monitor_timer = None
