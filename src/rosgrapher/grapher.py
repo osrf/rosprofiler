@@ -33,12 +33,12 @@ class Grapher(object):
     Information is only published when a change is detected.
     """
     def __init__(self, name=None):
-        self._NAME = name or "Grapher"
+        self._NAME = name or "rosgrapher"
 
         # Force singleton by not allowing name to be remapped
         if not re.findall("^/*(.+)$", rospy.get_name())[0] == self._NAME:
             raise rospy.ROSInitException(
-                "Node '%s' of type rosprofiler/grapher.py should only use the name '%s' to avoid being run multiple times." % (rospy.get_name(), self._NAME))
+                "Node '%s' of type rosprofiler/rosgrapher should only use the name '%s' to avoid being run multiple times." % (rospy.get_name(), self._NAME))
 
         self._master = rosgraph.Master(self._NAME)
         self._publisher = rospy.Publisher('/topology', Graph, queue_size=10, latch=True)

@@ -58,8 +58,8 @@ rosout.connections.append(Connection(destination='/talker2',topic='/rosout',dire
 rosout.connections.append(Connection(destination='/listener1',topic='/rosout',direction=1,transport="TCPROS"))
 rosout.connections.append(Connection(destination='/listener2',topic='/rosout',direction=1,transport="TCPROS"))
 rosout.connections.append(Connection(destination='/test_grapher',topic='/rosout',direction=1,transport="TCPROS"))
-rosout.connections.append(Connection(destination='/Grapher',topic='/rosout',direction=1,transport="TCPROS"))
-grapher = Node(name="/Grapher")
+rosout.connections.append(Connection(destination='/rosgrapher',topic='/rosout',direction=1,transport="TCPROS"))
+grapher = Node(name="/rosgrapher")
 grapher.publishes.append("/rosout")
 grapher.publishes.append("/topology")
 grapher.connections.append(Connection(destination='/rosout',topic='/rosout',direction=2,transport="TCPROS"))
@@ -68,13 +68,13 @@ tester = Node(name="/test_grapher")
 tester.publishes.append("/rosout")
 tester.subscribes.append("/topology")
 tester.connections.append(Connection(destination='/rosout',topic='/rosout',direction=2,transport="TCPROS"))
-tester.connections.append(Connection(destination='/Grapher',topic='/topology',direction=1,transport="TCPROS"))
+tester.connections.append(Connection(destination='/rosgrapher',topic='/topology',direction=1,transport="TCPROS"))
 EXPECTED_NODES['/talker1'] = talker1
 EXPECTED_NODES['/talker2'] = talker2
 EXPECTED_NODES['/listener1'] = listener1
 EXPECTED_NODES['/listener2'] = listener2
 EXPECTED_NODES['/rosout'] = rosout
-EXPECTED_NODES['/Grapher'] = grapher
+EXPECTED_NODES['/rosgrapher'] = grapher
 EXPECTED_NODES['/'+NAME] = tester
 
 t_chatter = Topic(name="/chatter", type="std_msgs/String")
