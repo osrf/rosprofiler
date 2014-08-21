@@ -2,8 +2,8 @@
 Changelog for package rosprofiler
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.1 (2014-08-20)
+------------------
 * Fixes Issue #5 
 * Fixes tests
 * Added additional dependencies to package.xml
