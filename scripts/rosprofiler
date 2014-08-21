@@ -23,19 +23,19 @@ import rospy
 from rosprofiler import Profiler
 
 
-def custom_exception_handler(type, value, tb):
-    """Gracefully handles ROSInterruptExceptions in rospy.Timer.
-    """
-    # NOTE: I was having trouble with Timer exiting with an exception, but
-    # that problem doesn't seem to be happening anymore. I am leaving this
-    # code here in case it is needed in the future.
-    if type is rospy.ROSInterruptException:
-        return
+def custom_exception_handler(type_, value, tb):
+    """Gracefully handles ROSInterruptExceptions in rospy.Timer """
+    if not isinstance(type_, rospy.ROSInterruptException):
+        sys.__excepthook__(type_, value, tb)
     else:
-        sys.__excepthook__(type, value, tb)
+        import os
+        import traceback
+        rospy.logdebug(traceback.format_tb(tb))
+        if 'ROSPY_TIMER_DEBUG' in os.environ:
+            rospy.logwarn(traceback.format_tb(tb))
 
 if __name__ == '__main__':
-    # sys.excepthook = custom_exception_handler
+    sys.excepthook = custom_exception_handler
     profiler = Profiler()
     try:
         profiler.start()

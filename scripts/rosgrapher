@@ -14,12 +14,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+
 import rospy
 
 from rosgrapher import Grapher
 
+def custom_exception_handler(type_, value, tb):
+    """Gracefully handles ROSInterruptExceptions in rospy.Timer """
+    print "enter"
+    if not isinstance(type_, rospy.ROSInterruptException):
+        print "yay"
+        sys.__excepthook__(type_, value, tb)
+    else:
+        import os
+        import traceback
+        rospy.logdebug(traceback.format_tb(tb))
+        print "whoa"
+        if 'ROSPY_TIMER_DEBUG' in os.environ:
+            rospy.logwarn(traceback.format_tb(tb))
+
+
 if __name__ == '__main__':
+    sys.excepthook = custom_exception_handler
     rospy.init_node('Grapher')
+    print "nice"
     grapher = Grapher()
     grapher.start()
     rospy.spin()
