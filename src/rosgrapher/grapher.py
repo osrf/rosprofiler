@@ -93,14 +93,26 @@ class Grapher(object):
             if topic_name not in topics.keys():
                 rospy.logerr("Topic %s not found, skipping" % topic_name)
             for publishername in publisher_list:
+                if publishername not in nodes:
+                    rospy.logwarn("Node '%s' was not previously reported, "
+                                  "but is listed as publisher" % publishername)
+                    continue
                 nodes[publishername].publishes.append(topic_name)
         for topic_name, subscriber_list in systemstate[1]:
             if topic_name not in topics.keys():
                 rospy.logerr("Topic %s not found, skipping" % topic_name)
             for subscribername in subscriber_list:
+                if subscribername not in nodes:
+                    rospy.logwarn("Node '%s' was not previously reported, "
+                                  "but is listed as subscriber" % subscribername)
+                    continue
                 nodes[subscribername].subscribes.append(topic_name)
         for service_name, provider_list in systemstate[2]:
             for providername in provider_list:
+                if providername not in nodes:
+                    rospy.logwarn("Node '%s' was not previously reported, but "
+                                  "is listed as service provider" % providername)
+                    continue
                 service = Service(name=service_name)
                 try:
                     service.uri = self._master.lookupService(service_name)
