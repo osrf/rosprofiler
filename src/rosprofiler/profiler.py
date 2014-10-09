@@ -19,12 +19,16 @@ This information is published on the topics /node_statistics and /host_statistic
 
 """
 
+import hashlib
+import os
+import re
 import threading
 import xmlrpclib
 
 import rospy
 import rosgraph
 import rosnode
+from rosgraph.names import is_legal_name
 
 from ros_statistics_msgs.msg import NodeStatistics
 from ros_statistics_msgs.msg import HostStatistics
@@ -33,13 +37,45 @@ from host_monitor import HostMonitor
 from node_monitor import NodeMonitor
 
 
+def get_ros_hostname():
+    """ Try to get ROS_HOSTNAME environment variable.
+    returns: a ROS compatible hostname, or None.
+    """
+    ros_hostname = os.environ.get('ROS_HOSTNAME')
+    return ros_hostname if is_legal_name(ros_hostname) else None
+
+
+def get_ros_ip():
+    """ Try to get the ROS_IP environment variable as a valid name.
+    Returns: an ip address with '.' replaced with '_', or None if not set.
+    """
+    ros_ip = os.environ.get('ROS_IP')
+    if isinstance(ros_ip, str):
+        ros_ip = re.sub('\.', '_', ros_ip)
+    return ros_ip
+
+
+def get_sys_hostname():
+    """ If the system hostname is also a valid ROS name, return the hostname.
+    Otherwise, return the first 6 digits of the md5sum of the hostname
+    """
+    hostname = rosgraph.network.get_host_name()
+    return hostname if is_legal_name(hostname) else hashlib.md5(hostname).hexdigest()[:6]
+
+
 class Profiler(object):
     """ """
     def __init__(self, sample_rate=None, update_rate=None):
         self.sample_rate = sample_rate or rospy.Duration(0.1)
         self.update_rate = update_rate or rospy.Duration(2)
-        rospy.init_node('rosprofiler_%s' % rosgraph.network.get_host_name())
-        self._master = rosgraph.Master('rosprofiler_%s' % rosgraph.network.get_host_name())
+
+        # Generate a ROS compatible node name using the following options.
+        # Preference Order: 1) ROS_HOSTNAME, 2) ROS_IP w/ underscores (10_0_0_5)
+        # 3) hostname (if it is ROS naming compatible), 4) hashed hostname
+        nodename = get_ros_hostname() or get_ros_ip() or get_sys_hostname()
+
+        rospy.init_node('rosprofiler_%s' % nodename)
+        self._master = rosgraph.Master(rospy.names.get_name()[1:])
 
         self._lock = threading.Lock()
         self._monitor_timer = None
