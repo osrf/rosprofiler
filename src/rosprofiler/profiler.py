@@ -60,6 +60,9 @@ def get_sys_hostname():
     Otherwise, return the first 6 digits of the md5sum of the hostname
     """
     hostname = rosgraph.network.get_host_name()
+    hostname = hostname.replace('.', '_')
+    hostname = hostname.replace('-', '_')
+    hostname = hostname.replace(':', '_')
     return hostname if is_legal_name(hostname) else hashlib.md5(hostname).hexdigest()[:6]
 
 
