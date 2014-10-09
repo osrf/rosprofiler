@@ -2,8 +2,8 @@
 Changelog for package rosprofiler
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.2 (2014-10-09)
+------------------
 * Implements more robust automatic node name creation
 * Handles exceptions in rospy timer
 * Contributors: dan brooks

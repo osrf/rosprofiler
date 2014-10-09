@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>rosprofiler</name>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <description>
       The rosprofiler package provides the rosprofiler and rosgrapher tools.
       These tools run as nodes publishing their collected information on ros topics.
