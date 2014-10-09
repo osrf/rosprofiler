@@ -1,5 +1,5 @@
 <launch>
   <rosparam param="enable_statistics">true</rosparam>
-  <node pkg="rosprofiler" type="rosgrapher" name="rosgrapher" />
-  <node pkg="rosprofiler" type="rosprofiler" name="rosprofiler" />
+  <node pkg="rosprofiler" type="rosgrapher" name="rosgrapher" output="screen" />
+  <node pkg="rosprofiler" type="rosprofiler" name="rosprofiler" output="screen" />
 </launch>
